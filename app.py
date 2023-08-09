@@ -1,12 +1,14 @@
 # Dependencia del flask
-from flask import Flask
+from flask import Flask, render_template
 # Dependencia de modelos
 from flask_sqlalchemy import SQLAlchemy
 # Dependencia de migraciones
 from flask_migrate import Migrate
 # Dependencia para fecha y hora
 from datetime import datetime
-
+# Dependencia de wtf
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
 # Crear el objeto flask
 app = Flask(__name__)
 
@@ -14,12 +16,19 @@ app = Flask(__name__)
 # Definir la cadena de conexion(conection string)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/flask-shopy-2687340'
 app.config['SQLALCHEMY_TRACK_NOTIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'so'
 
 # Crear el objeto de modelos
 db = SQLAlchemy(app)
 
 # Crear el objeto de migracion
 migrate = Migrate(app, db)
+
+# Formulario Registro de productos
+class ProductosForm(FlaskForm):
+    nombre = StringField('ingrese nombre producto')
+    precio = StringField('ingrese precio producto')
+    submit = SubmitField('ingrese registrar producto')
 
 # Crear los modelos
 class Cliente(db.Model):
@@ -29,6 +38,9 @@ class Cliente(db.Model):
     username = db.Column(db.String(120), nullable = True)
     password = db.Column(db.String(128), nullable = True)
     email = db.Column(db.String(120), nullable = True)
+
+    # Relaciones SQL alchemy
+    ventas = db.relationship('Venta' , backref = "cliente" , lazy = "dynamic")
 
 # Crear los modelos
 class Producto(db.Model):
@@ -57,3 +69,14 @@ class Detalle(db.Model):
     venta_id = db.Column(db.Integer , db.ForeignKey('ventas.id'))
     cantidad = db.Column(db.Integer)
 
+ # Rutas
+@app.route('/productos',  methods = ['GET' ,'POST'])
+def nuevo_producto():
+    form = ProductosForm()
+    if form.validate_on_submit():
+        # Creamos un nuevo producto
+        p = Producto(nombre = form.nombre.data, precio = form.precio.data)
+        db.session.add(p)
+        db.session.commit()
+        return "Producto registrado :)"
+    return render_template('nuevo_producto.html' , form = form)
