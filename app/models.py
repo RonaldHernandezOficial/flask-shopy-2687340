@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+
 # Crear los modelos
 class Cliente(db.Model):
     # Definir los atributos

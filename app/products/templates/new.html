@@ -1,7 +1,9 @@
 {% extends 'bootstrap/base.html' %}
-{% import 'bootstrap/wtf.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
 {% block head %}
-  {{ soper() }}
+  {{ super() }}
 {% endblock %}
 
 
@@ -9,7 +11,10 @@
 <center>
   <h1> Nuevo Producto: </h1>
   <form action=""
-        method="POST">
+        method="POST" 
+        novalidate
+        enctype="multipart/form-data">
+        {{ wtf.quick_form(form)}}
   </form>
 </center> 
 {% endblock %}
